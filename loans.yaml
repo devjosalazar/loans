@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loans
+  labels:
+    app: loans
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: loans
+  template:
+    metadata: 
+      labels:
+        app: loans
+    spec: 
+      containers:
+        - name: loans
+          image: robindocker/microservice_loans:1.0.0
+          ports:
+          - containerPort: 8090
+          env:
+          - name: SPRING_PROFILES_ACTIVE
+            valueFrom:
+              configMapKeyRef: 
+                name: microservicios-configmap
+                key: spring_profiles_active
+          - name: SPRING_CONFIG_IMPORT
+            valueFrom:
+              configMapKeyRef: 
+                name: microservicios-configmap
+                key: spring_config_config_import  
+          - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+            valueFrom:
+              configMapKeyRef: 
+                name: microservicios-configmap
+                key: eureka_client_serviceurl_defaultzone         
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: loans-service
+spec:
+  selector:
+    app: loans
+  ports:
+    - protocol: TCP
+      port: 8090
+      targetPort: 8090
